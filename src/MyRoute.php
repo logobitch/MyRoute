@@ -45,7 +45,6 @@ Class MyRoute{
 
         if($method == 'controller') {
             $route_data = self::$_route->_getControllerData($uri, $callback);
-
             for($i=0; $i<7; $i++) {
                 array_push(self::$routes, $route_data['uri_arr'][$i]);
                 array_push(self::$methods, $route_data['method_arr'][$i]);
@@ -118,9 +117,12 @@ Class MyRoute{
                         $segment = explode('@', $last);
 
                         $controller = new $segment[0]();
+
                         if(count($segment) >= 2) {
+                            $method = $segment[1];
                             //call method
-                            $controller->$segment[1]();
+                            $controller->$method();
+
                             return;
                         }
                         //no target method,call index method
@@ -142,12 +144,13 @@ Class MyRoute{
                         $target = self::$limits[$pos][$route_mached[1]];
                         $route = preg_replace('/\:(\w+)\\??/', '('.$target.')', $route);
                     } elseif(empty(self::$limits[$pos])) {
-                        $route = preg_replace('/\:(\w+)\\??/', '(.*)', $route);
+                        $route = preg_replace('/\:(\w+)\\??/', '(\w+)', $route);
                     }
                 }
 
                 if(preg_match('#^' . $route . '$#', $uri, $mached)) {
                     if(self::$methods[$pos] == $method || $method == 'ANY') {
+
                         $found_uri = true;
 
                         //remove the first parameter
@@ -171,7 +174,7 @@ Class MyRoute{
                             if(! method_exists($controller, $segments[1])) {
                                 echo "Method not exists!";
                                 return;
-                            } 
+                            }
                             call_user_func_array(array($controller, $segments[1]), $mached);
                             return;
                         } else {
